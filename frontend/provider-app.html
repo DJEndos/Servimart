@@ -1,681 +1,269 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ServiLink Provider — Job dispatch</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
-    <style>
-      :root {
-        --ink: #0f1a17;
-        --panel: #16231f;
-        --panel-2: #1d2c27;
-        --paper: #eae6da;
-        --teal: #2c7a70;
-        --teal-bright: #3fa294;
-        --amber: #e8a33d;
-        --amber-deep: #c87f1e;
-        --rust: #c25b4a;
-        --slate: #7e8d87;
-        --line: rgba(234, 230, 218, 0.12);
-        font-size: 16px;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        background: var(--ink);
-        color: var(--paper);
-        font-family: "IBM Plex Sans", sans-serif;
-        -webkit-font-smoothing: antialiased;
-        display: flex;
-        justify-content: center;
-      }
-      .device {
-        width: 100%;
-        max-width: 440px;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        padding-bottom: 76px;
-      }
-      h1,
-      h2,
-      h3 {
-        font-family: "Archivo", sans-serif;
-        margin: 0;
-        letter-spacing: -0.01em;
-      }
-      .mono {
-        font-family: "IBM Plex Mono", monospace;
-      }
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ServiLink Provider — Job dispatch</title>
+<link rel="icon" type="image/png" href="/frontend//brand/servilink-icon-reverse.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F172A; --panel:#1E293B; --panel-2:#273449;
+    --primary:#14B8A6; --primary-dark:#0F766E;
+    --accent:#F59E0B; --accent-dark:#B45309;
+    --ink:#F1F5F9; --muted:#94A3B8; --border:#334155;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; display:flex; justify-content:center; }
+  .device{ width:100%; max-width:460px; min-height:100vh; display:flex; flex-direction:column; padding-bottom:76px; }
+  h1,h2,h3{ margin:0; }
 
-      /* ---------- Top status bar ---------- */
-      .status-bar {
-        padding: 20px 20px 16px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid var(--line);
-      }
-      .status-left {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .dot {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        background: var(--slate);
-      }
-      .dot.live {
-        background: var(--teal-bright);
-        box-shadow: 0 0 0 4px rgba(63, 162, 148, 0.18);
-      }
-      .status-text {
-        font-weight: 600;
-        font-size: 0.92rem;
-      }
-      .status-sub {
-        font-size: 0.74rem;
-        color: var(--slate);
-        margin-top: 1px;
-      }
+  .status-bar{ padding:16px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
+  .status-left{ display:flex; align-items:center; gap:10px; }
+  .dot{ width:9px; height:9px; border-radius:50%; background:var(--muted); }
+  .dot.live{ background:var(--primary); box-shadow:0 0 0 4px rgba(20,184,166,0.18); }
+  .status-text{ font-weight:600; font-size:0.92rem; }
+  .status-sub{ font-size:0.74rem; color:var(--muted); margin-top:1px; }
+  .toggle{ width:48px; height:27px; border-radius:100px; background:var(--panel-2); border:1px solid var(--border); position:relative; cursor:pointer; flex-shrink:0; }
+  .toggle::after{ content:""; position:absolute; top:2px; left:2px; width:21px; height:21px; border-radius:50%; background:var(--muted); transition:transform .18s ease, background .18s ease; }
+  .toggle.on{ background:rgba(20,184,166,0.2); border-color:var(--primary); }
+  .toggle.on::after{ transform:translateX(21px); background:var(--primary); }
 
-      .toggle {
-        width: 50px;
-        height: 28px;
-        border-radius: 100px;
-        background: var(--panel-2);
-        border: 1px solid var(--line);
-        position: relative;
-        cursor: pointer;
-        flex-shrink: 0;
-      }
-      .toggle::after {
-        content: "";
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        background: var(--slate);
-        transition:
-          transform 0.18s ease,
-          background 0.18s ease;
-      }
-      .toggle.on {
-        background: rgba(63, 162, 148, 0.25);
-        border-color: var(--teal-bright);
-      }
-      .toggle.on::after {
-        transform: translateX(22px);
-        background: var(--teal-bright);
-      }
+  .view{ display:none; flex:1; flex-direction:column; padding:20px; }
+  .view.active{ display:flex; }
 
-      .view {
-        display: none;
-        flex: 1;
-        flex-direction: column;
-        padding: 20px;
-      }
-      .view.active {
-        display: flex;
-      }
+  .idle{ flex:1; align-items:center; justify-content:center; text-align:center; gap:14px; display:flex; flex-direction:column; }
+  .pulse{ width:16px; height:16px; border-radius:50%; background:var(--primary); box-shadow:0 0 0 8px rgba(20,184,166,0.15); }
+  .idle h2{ font-size:1.02rem; }
+  .idle p{ color:var(--muted); font-size:0.84rem; max-width:230px; margin:0; }
 
-      /* ---------- Idle / waiting state ---------- */
-      .idle {
-        flex: 1;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        gap: 16px;
-        display: flex;
-        flex-direction: column;
-      }
-      .pulse-ring {
-        position: relative;
-        width: 96px;
-        height: 96px;
-      }
-      .pulse-ring span {
-        position: absolute;
-        inset: 0;
-        border: 1px solid var(--teal-bright);
-        border-radius: 50%;
-        opacity: 0;
-        animation: pulse 2.6s ease-out infinite;
-      }
-      .pulse-ring span:nth-child(2) {
-        animation-delay: 0.9s;
-      }
-      .pulse-ring::before {
-        content: "";
-        position: absolute;
-        inset: 36px;
-        background: var(--teal-bright);
-        border-radius: 50%;
-      }
-      @keyframes pulse {
-        0% {
-          transform: scale(0.4);
-          opacity: 0.6;
-        }
-        100% {
-          transform: scale(1);
-          opacity: 0;
-        }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .pulse-ring span {
-          animation: none;
-          opacity: 0.25;
-        }
-      }
-      .idle h2 {
-        font-size: 1.05rem;
-      }
-      .idle p {
-        color: var(--slate);
-        font-size: 0.84rem;
-        max-width: 230px;
-      }
+  .offline-note{ flex:1; align-items:center; justify-content:center; text-align:center; display:flex; flex-direction:column; gap:10px; }
+  .offline-note svg{ width:34px; height:34px; stroke:var(--muted); }
+  .offline-note h2{ font-size:1rem; color:var(--muted); }
 
-      .offline-note {
-        flex: 1;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      }
-      .offline-note svg {
-        width: 38px;
-        height: 38px;
-        stroke: var(--slate);
-      }
-      .offline-note h2 {
-        font-size: 1rem;
-        color: var(--slate);
-      }
+  .card{ background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .card-head{ display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--border); }
+  .offer-cat{ font-weight:600; font-size:0.98rem; }
 
-      /* ---------- Job offer ticket ---------- */
-      .offer-ticket {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        overflow: hidden;
-      }
-      .offer-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 14px 18px;
-        border-bottom: 1.5px dashed var(--line);
-      }
-      .offer-cat {
-        font-weight: 700;
-        font-size: 1rem;
-      }
-      .countdown {
-        position: relative;
-        width: 46px;
-        height: 46px;
-        flex-shrink: 0;
-      }
-      .countdown svg {
-        transform: rotate(-90deg);
-        width: 46px;
-        height: 46px;
-      }
-      .countdown circle {
-        fill: none;
-        stroke-width: 3.5;
-      }
-      .countdown .track {
-        stroke: var(--line);
-      }
-      .countdown .fill {
-        stroke: var(--amber);
-        stroke-linecap: round;
-        transition: stroke-dashoffset 1s linear;
-      }
-      .countdown .num {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.74rem;
-        font-weight: 600;
-      }
-      .offer-body {
-        padding: 18px;
-      }
-      .offer-addr {
-        font-size: 0.88rem;
-        color: var(--slate);
-        margin-bottom: 14px;
-      }
-      .offer-meta {
-        display: flex;
-        gap: 16px;
-        margin-bottom: 18px;
-      }
-      .offer-meta div {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.82rem;
-      }
-      .offer-meta svg {
-        width: 15px;
-        height: 15px;
-        stroke: var(--teal-bright);
-      }
-      .offer-meta .val {
-        font-weight: 600;
-      }
+  .countdown{ position:relative; width:42px; height:42px; flex-shrink:0; }
+  .countdown svg{ transform:rotate(-90deg); width:42px; height:42px; }
+  .countdown circle{ fill:none; stroke-width:3.5; }
+  .countdown .track{ stroke:var(--border); }
+  .countdown .fill{ stroke:var(--accent); stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+  .countdown .num{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:600; }
 
-      .offer-actions {
-        display: flex;
-        gap: 10px;
-      }
-      .btn {
-        font-family: "IBM Plex Sans";
-        font-weight: 600;
-        font-size: 0.94rem;
-        border: none;
-        border-radius: 6px;
-        padding: 15px;
-        cursor: pointer;
-        flex: 1;
-        text-align: center;
-      }
-      .btn-accept {
-        background: var(--amber);
-        color: #20140a;
-      }
-      .btn-accept:hover {
-        background: var(--amber-deep);
-      }
-      .btn-decline {
-        background: transparent;
-        border: 1px solid var(--line);
-        color: var(--paper);
-      }
-      .btn:focus-visible {
-        outline: 2px solid var(--teal-bright);
-        outline-offset: 2px;
-      }
+  .card-body{ padding:16px; }
+  .offer-addr{ font-size:0.86rem; color:var(--muted); margin-bottom:14px; }
+  .offer-meta{ display:flex; gap:16px; margin-bottom:18px; }
+  .offer-meta div{ display:flex; align-items:center; gap:6px; font-size:0.82rem; }
+  .offer-meta svg{ width:15px; height:15px; stroke:var(--primary); }
+  .offer-meta .val{ font-weight:600; }
 
-      /* ---------- Active job ---------- */
-      .active-ticket {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        padding: 18px;
-      }
-      .active-ticket .stage {
-        font-size: 0.74rem;
-        color: var(--amber);
-        font-weight: 600;
-        margin-bottom: 6px;
-      }
+  .offer-actions{ display:flex; gap:10px; }
+  .btn{ font-family:inherit; font-weight:600; font-size:0.92rem; border:none; border-radius:10px; padding:14px; cursor:pointer; flex:1; text-align:center; }
+  .btn-accept{ background:var(--primary); color:#04201C; }
+  .btn-accept:hover{ background:#0d9488; }
+  .btn-decline{ background:transparent; border:1px solid var(--border); color:var(--ink); }
 
-      /* ---------- Summary strip ---------- */
-      .summary {
-        margin-top: 18px;
-        display: flex;
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        overflow: hidden;
-      }
-      .summary div {
-        flex: 1;
-        padding: 14px;
-        text-align: center;
-      }
-      .summary div + div {
-        border-left: 1px solid var(--line);
-      }
-      .summary .num {
-        font-size: 1.15rem;
-        font-weight: 600;
-      }
-      .summary .lbl {
-        font-size: 0.7rem;
-        color: var(--slate);
-        margin-top: 2px;
-      }
+  .summary{ margin-top:18px; display:flex; background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .summary div{ flex:1; padding:14px; text-align:center; }
+  .summary div + div{ border-left:1px solid var(--border); }
+  .summary .num{ font-size:1.1rem; font-weight:600; }
+  .summary .lbl{ font-size:0.7rem; color:var(--muted); margin-top:2px; }
 
-      /* ---------- Jobs / earnings list views ---------- */
-      .job-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 14px 2px;
-        border-bottom: 1px solid var(--line);
-      }
-      .job-row .jr-title {
-        font-weight: 500;
-        font-size: 0.9rem;
-      }
-      .job-row .jr-sub {
-        font-size: 0.76rem;
-        color: var(--slate);
-        margin-top: 2px;
-      }
-      .job-row .jr-amt {
-        font-size: 0.9rem;
-        font-weight: 500;
-      }
+  .job-row{ display:flex; justify-content:space-between; align-items:center; padding:14px; background:var(--panel); border:1px solid var(--border); border-radius:10px; margin-bottom:10px; }
+  .job-row .jr-title{ font-weight:500; font-size:0.9rem; }
+  .job-row .jr-sub{ font-size:0.76rem; color:var(--muted); margin-top:2px; }
+  .job-row .jr-amt{ font-size:0.9rem; font-weight:600; }
 
-      .earn-hero {
-        text-align: center;
-        padding: 20px 0 28px;
-      }
-      .earn-hero .amt {
-        font-size: 2.1rem;
-        font-weight: 600;
-      }
-      .earn-hero .lbl {
-        font-size: 0.8rem;
-        color: var(--slate);
-        margin-top: 4px;
-      }
+  .earn-hero{ text-align:center; padding:18px 0 26px; }
+  .earn-hero .amt{ font-size:2rem; font-weight:700; }
+  .earn-hero .lbl{ font-size:0.8rem; color:var(--muted); margin-top:4px; }
 
-      /* ---------- Tabs ---------- */
-      .tabbar {
-        position: fixed;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100%;
-        max-width: 440px;
-        background: var(--panel);
-        border-top: 1px solid var(--line);
-        display: flex;
-        padding: 8px 10px 14px;
-      }
-      .tab {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        font-size: 0.68rem;
-        color: var(--slate);
-        cursor: pointer;
-        padding: 6px 0;
-        background: none;
-        border: none;
-        font-family: inherit;
-      }
-      .tab svg {
-        width: 20px;
-        height: 20px;
-        stroke: var(--slate);
-      }
-      .tab.active {
-        color: var(--amber);
-      }
-      .tab.active svg {
-        stroke: var(--amber);
-      }
-    </style>
-  </head>
-  <body>
-    <div class="device">
+  .tabbar{ position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:460px; background:var(--panel); border-top:1px solid var(--border); display:flex; padding:8px 10px 14px; }
+  .tab{ flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:0.68rem; color:var(--muted); cursor:pointer; padding:6px 0; background:none; border:none; font-family:inherit; }
+  .tab svg{ width:20px; height:20px; stroke:var(--muted); }
+  .tab.active{ color:var(--accent); }
+  .tab.active svg{ stroke:var(--accent); }
 
-      <div class="status-bar">
-        <div class="status-left">
-          <div class="dot" id="statusDot"></div>
-          <div>
-            <div class="status-text" id="statusText">Offline</div>
-            <div class="status-sub">Port Harcourt · Electrician</div>
-          </div>
-        </div>
-        <div class="toggle" id="availToggle"></div>
-      </div>
+  .btn-outline-lg{ background:transparent; border:1px solid var(--border); color:var(--ink); font-family:inherit; font-weight:600; padding:12px; border-radius:10px; cursor:pointer; width:100%; }
+</style>
+</head>
+<body>
+<div class="device" id="app" style="display:none;">
 
-      <!-- ===================== HOME ===================== -->
-      <section class="view active" id="view-home">
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="dot" id="statusDot"></div>
+      <div><div class="status-text" id="statusText">Offline</div><div class="status-sub">Port Harcourt · Electrician</div></div>
+    </div>
+    <div class="toggle" id="availToggle"></div>
+  </div>
 
-        <div class="offline-note" id="offlineNote">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
-          <h2>You're offline</h2>
-          <p style="color:var(--slate); font-size:0.84rem;">Go available to start receiving nearby job offers.</p>
-        </div>
-
-        <div class="idle" id="idleState" style="display:none;">
-          <div class="pulse-ring"><span></span><span></span></div>
-          <h2>You're available</h2>
-          <p>Waiting for a nearby job — this stays on in the background.</p>
-        </div>
-
-        <!-- Incoming offer -->
-        <div id="offerState" style="display:none;">
-          <div class="offer-ticket">
-            <div class="offer-head">
-              <div class="offer-cat" id="offerCat">Electrical repair</div>
-              <div class="countdown">
-                <svg viewBox="0 0 46 46"><circle class="track" cx="23" cy="23" r="19"/><circle class="fill" id="countRing" cx="23" cy="23" r="19"/></svg>
-                <div class="num mono" id="countNum">25</div>
-              </div>
-            </div>
-            <div class="offer-body">
-              <div class="offer-addr" id="offerAddr">Off Ada George Rd, near NNPC filling station</div>
-              <div class="offer-meta">
-                <div><svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21c-4-4.5-7-8.3-7-11.5A7 7 0 0 1 19 9.5C19 12.7 16 16.5 12 21Z"/></svg><span class="val" id="offerDist">1.2 km</span></div>
-                <div><svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg><span class="val mono" id="offerFee">₦8,500 est.</span></div>
-              </div>
-              <div class="offer-actions">
-                <button class="btn btn-decline" id="declineBtn">Decline</button>
-                <button class="btn btn-accept" id="acceptBtn">Accept</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Active job -->
-        <div id="activeState" style="display:none;">
-          <div class="active-ticket">
-            <div class="stage">EN ROUTE</div>
-            <h3 style="font-size:1.05rem; margin-bottom:4px;" id="activeCat">Electrical repair</h3>
-            <p style="color:var(--slate); font-size:0.86rem; margin:0 0 16px;" id="activeAddr">Off Ada George Rd, near NNPC filling station</p>
-            <div class="offer-actions">
-              <button class="btn btn-decline" id="callBtn">Call customer</button>
-              <button class="btn btn-accept" id="completeBtn">Mark complete</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="summary">
-          <div><div class="num mono">3</div><div class="lbl">Jobs today</div></div>
-          <div><div class="num mono">₦14,500</div><div class="lbl">Earned today</div></div>
-          <div><div class="num mono">4.8</div><div class="lbl">Rating</div></div>
-        </div>
-      </section>
-
-      <!-- ===================== JOBS ===================== -->
-      <section class="view" id="view-jobs">
-        <h3 style="margin:4px 0 14px;">Recent jobs</h3>
-        <div class="job-row"><div><div class="jr-title">Electrical repair</div><div class="jr-sub mono">Today · 2:07 PM</div></div><div class="jr-amt mono">₦8,500</div></div>
-        <div class="job-row"><div><div class="jr-title">Rewiring — 2 rooms</div><div class="jr-sub mono">Today · 11:20 AM</div></div><div class="jr-amt mono">₦6,000</div></div>
-        <div class="job-row"><div><div class="jr-title">Socket replacement</div><div class="jr-sub mono">Yesterday</div></div><div class="jr-amt mono">₦4,000</div></div>
-      </section>
-
-      <!-- ===================== EARNINGS ===================== -->
-      <section class="view" id="view-earnings">
-        <div class="earn-hero">
-          <div class="amt mono">₦186,200</div>
-          <div class="lbl">This month · 24 jobs completed</div>
-        </div>
-        <div class="job-row"><div><div class="jr-title">Payout to GTBank ••1287</div><div class="jr-sub mono">Sep 15</div></div><div class="jr-amt mono">₦92,000</div></div>
-        <div class="job-row"><div><div class="jr-title">Payout to GTBank ••1287</div><div class="jr-sub mono">Sep 1</div></div><div class="jr-amt mono">₦74,200</div></div>
-      </section>
-
-      <!-- ===================== PROFILE ===================== -->
-      <section class="view" id="view-profile">
-        <div style="text-align:center; padding:40px 0;">
-          <div style="width:56px;height:56px;border-radius:50%;background:var(--teal-bright);color:var(--ink);display:flex;align-items:center;justify-content:center;font-family:Archivo;font-weight:700;margin:0 auto 14px;">TA</div>
-          <h3>Tunde Adeyemi</h3>
-          <p style="color:var(--slate); font-size:0.86rem; margin-top:4px;">Electrician · Verified · Port Harcourt</p>
-        </div>
-      </section>
-
-      <nav class="tabbar">
-        <button class="tab active" data-tab="home">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/></svg>
-          Home
-        </button>
-        <button class="tab" data-tab="jobs">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="1"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
-          Jobs
-        </button>
-        <button class="tab" data-tab="earnings">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M8 6h5.5a3 3 0 0 1 0 6H8m0 0h6.5a3 3 0 0 1 0 6H8"/></svg>
-          Earnings
-        </button>
-        <button class="tab" data-tab="profile">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c1.5-4 4.2-6 7-6s5.5 2 7 6"/></svg>
-          Profile
-        </button>
-      </nav>
+  <section class="view active" id="view-home">
+    <div class="offline-note" id="offlineNote">
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+      <h2>You're offline</h2>
+      <p style="color:var(--muted); font-size:0.84rem;">Go available to start receiving nearby job offers.</p>
     </div>
 
-    <script>
-      const CONFIG = {
-        API_BASE: "https://your-api.onrender.com/api",
-        DEMO_MODE: true,
-        AUTH_TOKEN: "",
-      };
+    <div class="idle" id="idleState" style="display:none;">
+      <div class="pulse"></div>
+      <h2>You're available</h2>
+      <p>Waiting for a nearby job — this stays on in the background.</p>
+    </div>
 
-      let available = false;
-      let offerTimer = null;
-      const RADIUS = 19,
-        CIRC = 2 * Math.PI * RADIUS;
+    <div id="offerState" style="display:none;">
+      <div class="card">
+        <div class="card-head">
+          <div class="offer-cat" id="offerCat">Electrical repair</div>
+          <div class="countdown"><svg viewBox="0 0 46 46"><circle class="track" cx="23" cy="23" r="19"/><circle class="fill" id="countRing" cx="23" cy="23" r="19"/></svg><div class="num" id="countNum">25</div></div>
+        </div>
+        <div class="card-body">
+          <div class="offer-addr" id="offerAddr">Off Ada George Rd, near NNPC filling station</div>
+          <div class="offer-meta">
+            <div><svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21c-4-4.5-7-8.3-7-11.5A7 7 0 0 1 19 9.5C19 12.7 16 16.5 12 21Z"/></svg><span class="val" id="offerDist">1.2 km</span></div>
+            <div><svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/></svg><span class="val" id="offerFee">₦8,500 est.</span></div>
+          </div>
+          <div class="offer-actions">
+            <button class="btn btn-decline" id="declineBtn">Decline</button>
+            <button class="btn btn-accept" id="acceptBtn">Accept</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      const toggle = document.getElementById("availToggle");
-      const statusDot = document.getElementById("statusDot");
-      const statusText = document.getElementById("statusText");
-      const offlineNote = document.getElementById("offlineNote");
-      const idleState = document.getElementById("idleState");
-      const offerState = document.getElementById("offerState");
-      const activeState = document.getElementById("activeState");
+    <div id="activeState" style="display:none;">
+      <div class="card">
+        <div class="card-body">
+          <div style="font-size:0.72rem; color:var(--accent); font-weight:700; margin-bottom:6px;">EN ROUTE</div>
+          <h3 style="font-size:1.02rem; margin-bottom:4px;" id="activeCat">Electrical repair</h3>
+          <p style="color:var(--muted); font-size:0.86rem; margin:0 0 16px;" id="activeAddr">Off Ada George Rd, near NNPC filling station</p>
+          <div class="offer-actions">
+            <button class="btn btn-decline" id="callBtn">Call customer</button>
+            <button class="btn btn-accept" id="completeBtn">Mark complete</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      toggle.addEventListener("click", async () => {
-        available = !available;
-        toggle.classList.toggle("on", available);
-        statusDot.classList.toggle("live", available);
-        statusText.textContent = available ? "Available" : "Offline";
+    <div class="summary">
+      <div><div class="num">3</div><div class="lbl">Jobs today</div></div>
+      <div><div class="num">₦14,500</div><div class="lbl">Earned today</div></div>
+      <div><div class="num">4.8</div><div class="lbl">Rating</div></div>
+    </div>
+  </section>
 
-        if (!CONFIG.DEMO_MODE) {
-          try {
-            await fetch(`${CONFIG.API_BASE}/provider/availability`, {
-              method: "PATCH",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${CONFIG.AUTH_TOKEN}`,
-              },
-              body: JSON.stringify({ available }),
-            });
-          } catch (e) {
-            /* surface a toast in production */
-          }
-        }
+  <section class="view" id="view-jobs">
+    <h3 style="margin:2px 0 16px; font-size:1.05rem;">Recent jobs</h3>
+    <div class="job-row"><div><div class="jr-title">Electrical repair</div><div class="jr-sub">Today · 2:07 PM</div></div><div class="jr-amt">₦8,500</div></div>
+    <div class="job-row"><div><div class="jr-title">Rewiring — 2 rooms</div><div class="jr-sub">Today · 11:20 AM</div></div><div class="jr-amt">₦6,000</div></div>
+    <div class="job-row"><div><div class="jr-title">Socket replacement</div><div class="jr-sub">Yesterday</div></div><div class="jr-amt">₦4,000</div></div>
+  </section>
 
-        renderHomeState();
-        if (available && CONFIG.DEMO_MODE) {
-          setTimeout(() => {
-            if (available) simulateOffer();
-          }, 2200);
-        }
+  <section class="view" id="view-earnings">
+    <div class="earn-hero"><div class="amt">₦186,200</div><div class="lbl">This month · 24 jobs completed</div></div>
+    <div class="job-row"><div><div class="jr-title">Payout to GTBank ••1287</div><div class="jr-sub">Sep 15</div></div><div class="jr-amt">₦92,000</div></div>
+    <div class="job-row"><div><div class="jr-title">Payout to GTBank ••1287</div><div class="jr-sub">Sep 1</div></div><div class="jr-amt">₦74,200</div></div>
+  </section>
+
+  <section class="view" id="view-profile">
+    <div style="text-align:center; padding:36px 0;">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--primary);color:#04201C;display:flex;align-items:center;justify-content:center;font-weight:700;margin:0 auto 14px;" id="profileInitials">TA</div>
+      <h3 id="profileName">Tunde Adeyemi</h3>
+      <p style="color:var(--muted); font-size:0.86rem; margin-top:4px;">Electrician · Verified · Port Harcourt</p>
+      <button class="btn-outline-lg" id="logoutBtn" style="margin-top:20px;">Log out</button>
+    </div>
+  </section>
+
+  <nav class="tabbar">
+    <button class="tab active" data-tab="home"><svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/></svg>Home</button>
+    <button class="tab" data-tab="jobs"><svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="1"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>Jobs</button>
+    <button class="tab" data-tab="earnings"><svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M8 6h5.5a3 3 0 0 1 0 6H8m0 0h6.5a3 3 0 0 1 0 6H8"/></svg>Earnings</button>
+    <button class="tab" data-tab="profile"><svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c1.5-4 4.2-6 7-6s5.5 2 7 6"/></svg>Profile</button>
+  </nav>
+</div>
+
+<script>
+const CONFIG = { API_BASE: 'https://your-api.onrender.com/api', DEMO_MODE: true };
+
+const auth = JSON.parse(localStorage.getItem('servilink_auth') || 'null');
+if (!CONFIG.DEMO_MODE) {
+  if (!auth || auth.role !== 'provider') location.href = 'login.html?role=provider';
+}
+document.getElementById('app').style.display = 'flex';
+if (auth) {
+  document.getElementById('profileName').textContent = auth.name || 'Provider';
+  document.getElementById('profileInitials').textContent = (auth.name || 'P').split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
+}
+document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem('servilink_auth'); location.href = 'landing-page.html'; });
+
+let available = false;
+let offerTimer = null;
+const RADIUS = 19, CIRC = 2 * Math.PI * RADIUS;
+const toggle = document.getElementById('availToggle');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+const offlineNote = document.getElementById('offlineNote');
+const idleState = document.getElementById('idleState');
+const offerState = document.getElementById('offerState');
+const activeState = document.getElementById('activeState');
+
+toggle.addEventListener('click', async () => {
+  available = !available;
+  toggle.classList.toggle('on', available);
+  statusDot.classList.toggle('live', available);
+  statusText.textContent = available ? 'Available' : 'Offline';
+  if (!CONFIG.DEMO_MODE) {
+    try {
+      await fetch(`${CONFIG.API_BASE}/provider/availability`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${auth.token}` },
+        body: JSON.stringify({ available }),
       });
+    } catch (e) {}
+  }
+  renderHomeState();
+  if (available && CONFIG.DEMO_MODE) setTimeout(() => { if (available) simulateOffer(); }, 2000);
+});
 
-      function renderHomeState() {
-        offlineNote.style.display = "none";
-        idleState.style.display = "none";
-        offerState.style.display = "none";
-        activeState.style.display = "none";
+function renderHomeState() {
+  offlineNote.style.display = 'none'; idleState.style.display = 'none'; offerState.style.display = 'none'; activeState.style.display = 'none';
+  if (!available) { offlineNote.style.display = 'flex'; return; }
+  idleState.style.display = 'flex';
+}
 
-        if (!available) {
-          offlineNote.style.display = "flex";
-          return;
-        }
-        idleState.style.display = "flex";
-      }
+function simulateOffer() {
+  offerState.style.display = 'block'; idleState.style.display = 'none';
+  let seconds = 25;
+  document.getElementById('countNum').textContent = seconds;
+  const ring = document.getElementById('countRing');
+  ring.style.strokeDasharray = CIRC; ring.style.strokeDashoffset = 0;
+  clearInterval(offerTimer);
+  offerTimer = setInterval(() => {
+    seconds--;
+    document.getElementById('countNum').textContent = seconds;
+    ring.style.strokeDashoffset = CIRC * (1 - seconds / 25);
+    if (seconds <= 0) { clearInterval(offerTimer); offerState.style.display = 'none'; renderHomeState(); }
+  }, 1000);
+}
 
-      function simulateOffer() {
-        offerState.style.display = "block";
-        idleState.style.display = "none";
-        let seconds = 25;
-        document.getElementById("countNum").textContent = seconds;
-        const ring = document.getElementById("countRing");
-        ring.style.strokeDasharray = CIRC;
-        ring.style.strokeDashoffset = 0;
+document.getElementById('acceptBtn').addEventListener('click', () => { clearInterval(offerTimer); offerState.style.display = 'none'; activeState.style.display = 'block'; });
+document.getElementById('declineBtn').addEventListener('click', () => { clearInterval(offerTimer); offerState.style.display = 'none'; renderHomeState(); });
+document.getElementById('completeBtn').addEventListener('click', () => { activeState.style.display = 'none'; renderHomeState(); });
 
-        clearInterval(offerTimer);
-        offerTimer = setInterval(() => {
-          seconds--;
-          document.getElementById("countNum").textContent = seconds;
-          ring.style.strokeDashoffset = CIRC * (1 - seconds / 25);
-          if (seconds <= 0) {
-            clearInterval(offerTimer);
-            offerState.style.display = "none";
-            renderHomeState();
-          }
-        }, 1000);
-      }
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const map = { home:'view-home', jobs:'view-jobs', earnings:'view-earnings', profile:'view-profile' };
+    document.getElementById(map[tab.dataset.tab]).classList.add('active');
+  });
+});
 
-      document.getElementById("acceptBtn").addEventListener("click", async () => {
-        clearInterval(offerTimer);
-        offerState.style.display = "none";
-        activeState.style.display = "block";
-        if (!CONFIG.DEMO_MODE) {
-          // await fetch(`${CONFIG.API_BASE}/provider/requests/${requestId}/accept`, { method:'POST', headers:{ Authorization:`Bearer ${CONFIG.AUTH_TOKEN}` } });
-        }
-      });
-
-      document.getElementById("declineBtn").addEventListener("click", () => {
-        clearInterval(offerTimer);
-        offerState.style.display = "none";
-        renderHomeState();
-      });
-
-      document.getElementById("completeBtn").addEventListener("click", () => {
-        activeState.style.display = "none";
-        renderHomeState();
-      });
-
-      document.querySelectorAll(".tab").forEach((tab) => {
-        tab.addEventListener("click", () => {
-          document
-            .querySelectorAll(".tab")
-            .forEach((t) => t.classList.remove("active"));
-          tab.classList.add("active");
-          document
-            .querySelectorAll(".view")
-            .forEach((v) => v.classList.remove("active"));
-          const map = {
-            home: "view-home",
-            jobs: "view-jobs",
-            earnings: "view-earnings",
-            profile: "view-profile",
-          };
-          document.getElementById(map[tab.dataset.tab]).classList.add("active");
-        });
-      });
-
-      renderHomeState();
-    </script>
-  </body>
+renderHomeState();
+</script>
+</body>
 </html>

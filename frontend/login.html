@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Log in or sign up — ServiLink</title>
+<link rel="icon" type="image/png" href="/frontend//brand/servilink-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#0F766E; --primary-dark:#0B5750; --primary-light:#CCFBF1;
+    --accent:#F59E0B;
+    --ink:#0F172A; --body:#334155; --muted:#64748B; --border:#E2E8F0; --bg:#F8FAFC;
+    --danger:#DC2626; --danger-light:#FEF2F2; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--bg); color:var(--body); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+
+  .top{ padding:24px 28px; }
+  .top img{ height:28px; }
+
+  .shell{ min-height:calc(100vh - 76px); display:flex; align-items:center; justify-content:center; padding:20px; }
+  .card{
+    width:100%; max-width:420px; background:var(--white); border:1px solid var(--border);
+    border-radius:12px; box-shadow:0 1px 3px rgba(15,23,42,0.06); padding:32px;
+  }
+  h1{ font-size:1.4rem; font-weight:700; color:var(--ink); margin:0 0 4px; }
+  .sub{ font-size:0.88rem; color:var(--muted); margin:0 0 22px; }
+
+  .tabs{ display:flex; gap:4px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:4px; margin-bottom:22px; }
+  .tab{
+    flex:1; text-align:center; padding:8px; border-radius:6px; font-size:0.86rem; font-weight:600;
+    color:var(--muted); cursor:pointer; border:none; background:none; font-family:inherit;
+  }
+  .tab.active{ background:var(--white); color:var(--ink); box-shadow:0 1px 2px rgba(15,23,42,0.06); }
+
+  label{ display:block; font-size:0.82rem; font-weight:600; color:var(--ink); margin:14px 0 6px; }
+  label:first-of-type{ margin-top:0; }
+  input, select{
+    width:100%; font-family:inherit; font-size:0.92rem; padding:10px 12px;
+    border:1px solid var(--border); border-radius:8px; color:var(--ink); background:var(--white);
+  }
+  input:focus, select:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(15,118,110,0.12); }
+
+  .role-banner{
+    display:flex; align-items:center; gap:10px; background:var(--primary-light); color:var(--primary-dark);
+    border-radius:8px; padding:10px 12px; font-size:0.84rem; font-weight:500; margin-bottom:20px;
+  }
+  .role-banner svg{ width:16px; height:16px; stroke:var(--primary-dark); flex-shrink:0; }
+
+  .admin-note{ font-size:0.82rem; color:var(--muted); background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:6px; }
+
+  .btn{
+    width:100%; font-family:inherit; font-weight:600; font-size:0.94rem; padding:11px;
+    border-radius:8px; border:none; cursor:pointer; margin-top:20px;
+  }
+  .btn-primary{ background:var(--primary); color:#fff; }
+  .btn-primary:hover{ background:var(--primary-dark); }
+  .btn-primary:disabled{ background:#CBD5E1; cursor:not-allowed; }
+  .error-box{
+    background:var(--danger-light); color:var(--danger); font-size:0.82rem; border-radius:8px;
+    padding:10px 12px; margin-top:14px; display:none;
+  }
+  .foot-link{ text-align:center; font-size:0.84rem; color:var(--muted); margin-top:18px; }
+  .foot-link a{ color:var(--primary); font-weight:600; }
+  .browse-link{ display:block; text-align:center; font-size:0.82rem; color:var(--muted); margin-top:14px; }
+  .browse-link:hover{ color:var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="top"><a href="/frontend/index.html"><img src="/frontend/brand/servilink-logo-horizontal.png" alt="ServiLink"></a></div>
+
+<div class="shell">
+  <div class="card">
+
+    <div class="role-banner" id="roleBanner">
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+      <span id="roleBannerText">Signing up as a customer</span>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-tab="login">Log in</button>
+      <button class="tab" data-tab="register" id="registerTab">Create account</button>
+    </div>
+
+    <!-- ===================== LOGIN ===================== -->
+    <div id="pane-login">
+      <h1 id="loginTitle">Welcome back</h1>
+      <p class="sub" id="loginSub">Log in to continue.</p>
+
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••">
+
+      <div class="admin-note" id="adminNote" style="display:none;">
+        Admin accounts are created by ServiLink operations directly — there's no
+        self-service admin sign-up.
+      </div>
+
+      <button class="btn btn-primary" id="loginBtn">Log in</button>
+      <div class="error-box" id="loginError"></div>
+    </div>
+
+    <!-- ===================== REGISTER ===================== -->
+    <div id="pane-register" style="display:none;">
+      <h1 id="registerTitle">Create your account</h1>
+      <p class="sub" id="registerSub">Takes about a minute.</p>
+
+      <label>Full name</label>
+      <input type="text" id="regName" placeholder="e.g. Chidi Nwosu">
+      <label>Email</label>
+      <input type="email" id="regEmail" placeholder="you@example.com">
+      <label>Phone number</label>
+      <input type="tel" id="regPhone" placeholder="080x xxx xxxx">
+      <label>City</label>
+      <select id="regCity">
+        <option>Port Harcourt</option>
+        <option>Lagos</option>
+        <option>Abuja</option>
+        <option>Ibadan</option>
+      </select>
+      <div id="providerFields" style="display:none;">
+        <label>Primary trade</label>
+        <select id="regCategory">
+          <option value="electrical">Electrical</option>
+          <option value="plumbing">Plumbing</option>
+          <option value="ac">AC repair</option>
+          <option value="carpentry">Carpentry</option>
+          <option value="generator">Generator</option>
+          <option value="painting">Painting</option>
+        </select>
+      </div>
+      <label>Password</label>
+      <input type="password" id="regPassword" placeholder="At least 8 characters">
+
+      <button class="btn btn-primary" id="registerBtn">Create account</button>
+      <div class="error-box" id="registerError"></div>
+    </div>
+
+    <a class="browse-link" href="/frontend/index.html">Just looking? Browse without an account</a>
+  </div>
+</div>
+
+<script>
+const CONFIG = {
+  API_BASE: 'https://your-api.onrender.com/api',
+  DEMO_MODE: true,
+};
+
+const params = new URLSearchParams(location.search);
+const role = ['customer', 'provider', 'admin'].includes(params.get('role')) ? params.get('role') : 'customer';
+const mode = params.get('mode') === 'register' ? 'register' : 'login';
+
+const REDIRECTS = { customer: 'customer-app.html', provider: 'provider-app.html', admin: 'admin-dashboard.html' };
+const ROLE_LABEL = { customer: 'a customer', provider: 'a provider', admin: 'an admin' };
+
+document.getElementById('roleBannerText').textContent =
+  (mode === 'register' ? 'Signing up as ' : 'Logging in as ') + ROLE_LABEL[role];
+document.getElementById('loginSub').textContent = `Log in to your ${role} account.`;
+document.getElementById('registerSub').textContent = `Set up your ${role} account — takes about a minute.`;
+
+if (role === 'provider') document.getElementById('providerFields').style.display = 'block';
+
+if (role === 'admin') {
+  document.getElementById('registerTab').style.display = 'none';
+  document.getElementById('adminNote').style.display = 'block';
+}
+
+function showPane(which) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === which));
+  document.getElementById('pane-login').style.display = which === 'login' ? 'block' : 'none';
+  document.getElementById('pane-register').style.display = which === 'register' ? 'block' : 'none';
+}
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showPane(t.dataset.tab)));
+showPane(role === 'admin' ? 'login' : mode);
+
+function setError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+function completeAuth(token, userRole, name) {
+  localStorage.setItem('servilink_auth', JSON.stringify({ token, role: userRole, name }));
+  location.href = REDIRECTS[userRole];
+}
+
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  setError('loginError', '');
+  if (!email || !password) return setError('loginError', 'Enter your email and password.');
+
+  if (CONFIG.DEMO_MODE) {
+    completeAuth('demo-token', role, role === 'admin' ? 'Admin' : 'Demo User');
+    return;
+  }
+  try {
+    const res = await fetch(`${CONFIG.API_BASE}/auth/login`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) return setError('loginError', data.error || 'Login failed.');
+    if (data.user.role !== role) return setError('loginError', `That account is registered as ${data.user.role}, not ${role}.`);
+    completeAuth(data.token, data.user.role, data.user.name);
+  } catch (e) {
+    setError('loginError', 'Could not reach the server. Check API_BASE in CONFIG.');
+  }
+});
+
+document.getElementById('registerBtn').addEventListener('click', async () => {
+  const payload = {
+    name: document.getElementById('regName').value.trim(),
+    email: document.getElementById('regEmail').value.trim(),
+    phone: document.getElementById('regPhone').value.trim(),
+    city: document.getElementById('regCity').value,
+    password: document.getElementById('regPassword').value,
+    role,
+    categoryIds: role === 'provider' ? [document.getElementById('regCategory').value] : undefined,
+  };
+  setError('registerError', '');
+  if (!payload.name || !payload.email || !payload.phone || !payload.password) {
+    return setError('registerError', 'Fill in every field.');
+  }
+  if (payload.password.length < 8) return setError('registerError', 'Password should be at least 8 characters.');
+
+  if (CONFIG.DEMO_MODE) {
+    completeAuth('demo-token', role, payload.name);
+    return;
+  }
+  try {
+    const res = await fetch(`${CONFIG.API_BASE}/auth/register`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) return setError('registerError', data.error || 'Registration failed.');
+    completeAuth(data.token, data.user.role, payload.name);
+  } catch (e) {
+    setError('registerError', 'Could not reach the server. Check API_BASE in CONFIG.');
+  }
+});
+</script>
+</body>
+</html>

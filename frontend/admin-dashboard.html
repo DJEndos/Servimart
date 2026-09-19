@@ -1,641 +1,227 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ServiLink Admin — Operations console</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-      :root {
-        --ink: #172420;
-        --paper: #f4f1e7;
-        --panel: #ffffff;
-        --sidebar: #152420;
-        --teal: #1f5c56;
-        --teal-deep: #123b37;
-        --amber: #e8a33d;
-        --amber-deep: #c87f1e;
-        --rust: #b0483a;
-        --slate: #7c877e;
-        --line: #dedacd;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        background: var(--paper);
-        color: var(--ink);
-        font-family: "IBM Plex Sans", sans-serif;
-        -webkit-font-smoothing: antialiased;
-      }
-      h1,
-      h2,
-      h3 {
-        font-family: "Archivo", sans-serif;
-        margin: 0;
-        letter-spacing: -0.01em;
-      }
-      .mono {
-        font-family: "IBM Plex Mono", monospace;
-      }
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ServiLink Admin — Operations console</title>
+<link rel="icon" type="image/png" href="../brand/servilink-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F172A; --body:#334155; --muted:#64748B; --border:#E2E8F0; --bg:#F8FAFC; --white:#FFFFFF;
+    --primary:#0F766E; --primary-dark:#0B5750; --primary-light:#CCFBF1;
+    --accent:#F59E0B; --accent-light:#FEF3C7; --accent-dark:#B45309;
+    --danger:#DC2626; --danger-light:#FEF2F2;
+    --sidebar:#111827; --sidebar-2:#1F2937;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--bg); color:var(--body); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3{ margin:0; color:var(--ink); }
+  .shell{ display:flex; min-height:100vh; }
 
-      .shell {
-        display: flex;
-        min-height: 100vh;
-      }
+  .sidebar{ width:220px; background:var(--sidebar); color:#CBD5E1; flex-shrink:0; padding:20px 12px; display:flex; flex-direction:column; }
+  .sidebar img{ height:22px; margin:4px 10px 24px; }
+  .nav-item{ display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:8px; font-size:0.88rem; font-weight:500; color:#94A3B8; cursor:pointer; margin-bottom:2px; }
+  .nav-item svg{ width:17px; height:17px; stroke:currentColor; flex-shrink:0; }
+  .nav-item:hover{ background:var(--sidebar-2); }
+  .nav-item.active{ background:var(--primary); color:#fff; }
+  .nav-item .count{ margin-left:auto; font-size:0.7rem; background:var(--accent); color:#1C1917; padding:1px 7px; border-radius:100px; font-weight:600; }
+  .nav-item .count.danger{ background:var(--danger); color:#fff; }
+  .side-foot{ margin-top:auto; padding:12px 10px; font-size:0.76rem; color:#64748B; }
+  .logout-link{ display:block; margin-top:8px; color:#94A3B8; cursor:pointer; text-decoration:underline; }
 
-      /* ---------- Sidebar ---------- */
-      .sidebar {
-        width: 216px;
-        background: var(--sidebar);
-        color: var(--paper);
-        flex-shrink: 0;
-        padding: 22px 14px;
-        display: flex;
-        flex-direction: column;
-      }
-      .side-word {
-        font-family: "Archivo";
-        font-weight: 700;
-        font-size: 1.05rem;
-        padding: 0 8px 8px;
-        background: var(--paper);
-        border-radius: 0.5ch;
-        position: relative;
-        top: 7px;
-      }
-      .side-word span {
-        color: var(--amber);
-      }
-      .side-word img{
-        width: 100px;
-      }
-      .nav-item {
-        display: flex;
-        align-items: center;
-        gap: 11px;
-        padding: 10px 12px;
-        border-radius: 5px;
-        font-size: 0.88rem;
-        font-weight: 500;
-        color: rgba(234, 230, 218, 0.72);
-        cursor: pointer;
-        margin-bottom: 2px;
-      }
-      .nav-item svg {
-        width: 17px;
-        height: 17px;
-        stroke: currentColor;
-        flex-shrink: 0;
-      }
-      .nav-item:hover {
-        background: rgba(234, 230, 218, 0.06);
-      }
-      .nav-item.active {
-        background: var(--teal);
-        color: #fff;
-      }
-      .nav-item .count {
-        margin-left: auto;
-        font-size: 0.7rem;
-        font-family: "IBM Plex Mono";
-        background: var(--amber);
-        color: #20140a;
-        padding: 1px 6px;
-        border-radius: 100px;
-      }
-      .side-foot {
-        margin-top: auto;
-        padding: 12px;
-        font-size: 0.76rem;
-        color: rgba(234, 230, 218, 0.45);
-      }
+  .main{ flex:1; padding:28px 34px; max-width:1120px; }
+  .page-head{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px; }
+  .page-head h1{ font-size:1.4rem; }
+  select{ font-family:inherit; font-size:0.86rem; padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:var(--white); color:var(--ink); }
 
-      /* ---------- Main ---------- */
-      .main {
-        flex: 1;
-        padding: 28px 34px;
-        max-width: 1080px;
-      }
-      .page-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        margin-bottom: 24px;
-      }
-      .page-head h1 {
-        font-size: 1.4rem;
-      }
-      select,
-      .city-select {
-        font-family: inherit;
-        font-size: 0.84rem;
-        padding: 8px 12px;
-        border-radius: 5px;
-        border: 1px solid var(--line);
-        background: var(--panel);
-        color: var(--ink);
-      }
+  .page{ display:none; } .page.active{ display:block; }
 
-      .page {
-        display: none;
-      }
-      .page.active {
-        display: block;
-      }
+  .stat-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:30px; }
+  .stat-tile{ background:var(--white); border:1px solid var(--border); border-radius:12px; padding:16px 18px; }
+  .stat-tile .num{ font-size:1.5rem; font-weight:700; color:var(--ink); }
+  .stat-tile .num.danger{ color:var(--danger); }
+  .stat-tile .lbl{ font-size:0.78rem; color:var(--muted); margin-top:4px; }
 
-      /* ---------- Stat tiles ---------- */
-      .stat-grid {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 12px;
-        margin-bottom: 30px;
-      }
-      .stat-tile {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        padding: 16px 18px;
-      }
-      .stat-tile .num {
-        font-family: "IBM Plex Mono";
-        font-size: 1.5rem;
-        font-weight: 500;
-      }
-      .stat-tile .num.rust {
-        color: var(--rust);
-      }
-      .stat-tile .lbl {
-        font-size: 0.76rem;
-        color: var(--slate);
-        margin-top: 4px;
-      }
+  .section-title{ display:flex; justify-content:space-between; align-items:center; margin:0 0 12px; font-size:0.92rem; font-weight:600; color:var(--ink); }
+  .panel{ background:var(--white); border:1px solid var(--border); border-radius:12px; margin-bottom:28px; overflow:hidden; box-shadow:0 1px 2px rgba(15,23,42,0.03); }
+  table{ width:100%; border-collapse:collapse; }
+  th{ text-align:left; font-size:0.72rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.03em; padding:11px 16px; border-bottom:1px solid var(--border); background:var(--bg); }
+  td{ padding:13px 16px; font-size:0.86rem; border-bottom:1px solid var(--border); color:var(--body); }
+  tr:last-child td{ border-bottom:none; }
+  tr:hover td{ background:rgba(15,118,110,0.03); }
 
-      /* ---------- Section / table ---------- */
-      .section-title {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin: 0 0 12px;
-        font-size: 0.92rem;
-        font-weight: 600;
-      }
-      .panel {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        margin-bottom: 28px;
-        overflow: hidden;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      th {
-        text-align: left;
-        font-size: 0.72rem;
-        font-weight: 600;
-        color: var(--slate);
-        padding: 11px 16px;
-        border-bottom: 1px solid var(--line);
-        font-family: "IBM Plex Sans";
-      }
-      td {
-        padding: 13px 16px;
-        font-size: 0.86rem;
-        border-bottom: 1px solid var(--line);
-      }
-      tr:last-child td {
-        border-bottom: none;
-      }
-      tr:hover td {
-        background: rgba(31, 92, 86, 0.03);
-      }
+  .badge{ font-size:0.72rem; font-weight:600; padding:3px 10px; border-radius:100px; }
+  .badge-teal{ background:var(--primary-light); color:var(--primary-dark); }
+  .badge-slate{ background:var(--bg); color:var(--muted); border:1px solid var(--border); }
+  .badge-danger{ background:var(--danger-light); color:var(--danger); }
 
-      .badge {
-        font-size: 0.7rem;
-        font-weight: 600;
-        padding: 3px 9px;
-        border-radius: 100px;
-        border: 1.5px solid currentColor;
-      }
-      .badge.amber {
-        color: var(--amber-deep);
-      }
-      .badge.teal {
-        color: var(--teal-deep);
-      }
-      .badge.rust {
-        color: var(--rust);
-      }
-      .badge.slate {
-        color: var(--slate);
-      }
+  .row-btn{ font-family:inherit; font-size:0.8rem; font-weight:600; padding:6px 14px; border-radius:8px; border:1px solid var(--primary); background:var(--white); color:var(--primary-dark); cursor:pointer; }
+  .row-btn:hover{ background:var(--primary); color:#fff; }
+  .row-btn.danger{ border-color:var(--danger); color:var(--danger); }
+  .row-btn.danger:hover{ background:var(--danger); color:#fff; }
+  .empty-row td{ text-align:center; color:var(--muted); padding:30px; }
 
-      .row-btn {
-        font-family: inherit;
-        font-size: 0.78rem;
-        font-weight: 600;
-        padding: 6px 13px;
-        border-radius: 5px;
-        border: 1px solid var(--teal-deep);
-        background: transparent;
-        color: var(--teal-deep);
-        cursor: pointer;
-      }
-      .row-btn:hover {
-        background: var(--teal-deep);
-        color: #fff;
-      }
-      .row-btn.danger {
-        border-color: var(--rust);
-        color: var(--rust);
-      }
-      .row-btn.danger:hover {
-        background: var(--rust);
-        color: #fff;
-      }
-      .row-btn:focus-visible {
-        outline: 2px solid var(--teal-deep);
-        outline-offset: 2px;
-      }
+  .cat-form{ display:flex; gap:10px; padding:16px; border-bottom:1px solid var(--border); }
+  .cat-form input{ font-family:inherit; font-size:0.86rem; padding:9px 12px; border-radius:8px; border:1px solid var(--border); flex:1; }
+  .cat-form button{ font-family:inherit; font-weight:600; font-size:0.84rem; padding:9px 16px; border-radius:8px; border:none; background:var(--primary); color:#fff; cursor:pointer; }
+  .cat-chip{ display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; background:var(--bg); border:1px solid var(--border); padding:5px 12px; border-radius:100px; margin:4px 6px 4px 0; }
+</style>
+</head>
+<body>
+<div class="shell" id="app" style="display:none;">
 
-      .empty-row td {
-        text-align: center;
-        color: var(--slate);
-        padding: 30px;
-      }
-
-      /* ---------- Categories page ---------- */
-      .cat-form {
-        display: flex;
-        gap: 10px;
-        padding: 16px;
-        border-bottom: 1px solid var(--line);
-      }
-      .cat-form input {
-        font-family: inherit;
-        font-size: 0.86rem;
-        padding: 9px 12px;
-        border-radius: 5px;
-        border: 1px solid var(--line);
-        flex: 1;
-      }
-      .cat-form button {
-        font-family: inherit;
-        font-weight: 600;
-        font-size: 0.84rem;
-        padding: 9px 16px;
-        border-radius: 5px;
-        border: none;
-        background: var(--amber);
-        color: var(--teal-deep);
-        cursor: pointer;
-      }
-      .cat-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 0.8rem;
-        background: var(--paper);
-        border: 1px solid var(--line);
-        padding: 5px 11px;
-        border-radius: 100px;
-        margin: 4px 6px 4px 0;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="shell">
-
-      <aside class="sidebar">
-        <div class="side-word"><img src="/frontend/img/logo.png" alt=""></div>
-
-        <div class="nav-item active" data-page="overview">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-          Overview
-        </div>
-        <div class="nav-item" data-page="providers">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path d="M4 20c1.3-4 4.2-6.5 7-6.5s5.7 2.5 7 6.5"/><path d="m17 9 2 2 3.5-3.5"/></svg>
-          Providers <span class="count" id="navPendingCount">3</span>
-        </div>
-        <div class="nav-item" data-page="users">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c1.5-4 4.2-6 7-6s5.5 2 7 6"/></svg>
-          Customers
-        </div>
-        <div class="nav-item" data-page="categories">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
-          Categories
-        </div>
-        <div class="nav-item" data-page="disputes">
-          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2 18a1.6 1.6 0 0 0 1.4 2.4h17.2A1.6 1.6 0 0 0 22 18L13.7 3.9a1.6 1.6 0 0 0-2.8 0Z"/></svg>
-          Disputes <span class="count" id="navDisputeCount" style="background:var(--rust); color:#fff;">1</span>
-        </div>
-
-        <div class="side-foot">Signed in as admin<br>Port Harcourt ops</div>
-      </aside>
-
-      <main class="main">
-
-        <!-- ===================== OVERVIEW ===================== -->
-        <section class="page active" id="page-overview">
-          <div class="page-head">
-            <h1>Overview</h1>
-            <select id="citySelect">
-              <option>Port Harcourt</option>
-              <option>Lagos</option>
-              <option>Abuja</option>
-              <option>Ibadan</option>
-            </select>
-          </div>
-
-          <div class="stat-grid">
-            <div class="stat-tile"><div class="num">142</div><div class="lbl">Total providers</div></div>
-            <div class="stat-tile"><div class="num">118</div><div class="lbl">Verified</div></div>
-            <div class="stat-tile"><div class="num">64</div><div class="lbl">Available now</div></div>
-            <div class="stat-tile"><div class="num">23</div><div class="lbl">Open requests</div></div>
-            <div class="stat-tile"><div class="num rust">1</div><div class="lbl">Disputed</div></div>
-          </div>
-
-          <div class="section-title">Pending verification</div>
-          <div class="panel">
-            <table>
-              <thead><tr><th>Name</th><th>Trade</th><th>Submitted</th><th></th></tr></thead>
-              <tbody id="overviewPendingBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- ===================== PROVIDERS ===================== -->
-        <section class="page" id="page-providers">
-          <div class="page-head"><h1>Providers</h1></div>
-          <div class="section-title">Pending verification</div>
-          <div class="panel">
-            <table>
-              <thead><tr><th>Name</th><th>Trade</th><th>City</th><th>Phone</th><th>Submitted</th><th></th></tr></thead>
-              <tbody id="pendingBody"></tbody>
-            </table>
-          </div>
-
-          <div class="section-title">Active providers</div>
-          <div class="panel">
-            <table>
-              <thead><tr><th>Name</th><th>Trade</th><th>Rating</th><th>Jobs</th><th>Status</th><th></th></tr></thead>
-              <tbody id="activeProvidersBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- ===================== CUSTOMERS ===================== -->
-        <section class="page" id="page-users">
-          <div class="page-head"><h1>Customers</h1></div>
-          <div class="panel">
-            <table>
-              <thead><tr><th>Name</th><th>Phone</th><th>City</th><th>Requests posted</th><th>Status</th><th></th></tr></thead>
-              <tbody id="usersBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- ===================== CATEGORIES ===================== -->
-        <section class="page" id="page-categories">
-          <div class="page-head"><h1>Categories</h1></div>
-          <div class="panel">
-            <div class="cat-form">
-              <input type="text" id="catNameInput" placeholder="e.g. Roofing">
-              <button id="addCatBtn">Add category</button>
-            </div>
-            <div style="padding:16px;" id="catChipWrap"></div>
-          </div>
-        </section>
-
-        <!-- ===================== DISPUTES ===================== -->
-        <section class="page" id="page-disputes">
-          <div class="page-head"><h1>Disputes</h1></div>
-          <div class="panel">
-            <table>
-              <thead><tr><th>Job</th><th>Customer</th><th>Provider</th><th>Raised</th><th></th></tr></thead>
-              <tbody id="disputesBody"></tbody>
-            </table>
-          </div>
-        </section>
-
-      </main>
+  <aside class="sidebar">
+    <img src="../brand/servilink-logo-horizontal-reverse.png" alt="ServiLink">
+    <div class="nav-item active" data-page="overview">
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Overview
     </div>
+    <div class="nav-item" data-page="providers">
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path d="M4 20c1.3-4 4.2-6.5 7-6.5s5.7 2.5 7 6.5"/><path d="m17 9 2 2 3.5-3.5"/></svg>Providers <span class="count" id="navPendingCount">3</span>
+    </div>
+    <div class="nav-item" data-page="users">
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c1.5-4 4.2-6 7-6s5.5 2 7 6"/></svg>Customers
+    </div>
+    <div class="nav-item" data-page="categories">
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>Categories
+    </div>
+    <div class="nav-item" data-page="disputes">
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 2 18a1.6 1.6 0 0 0 1.4 2.4h17.2A1.6 1.6 0 0 0 22 18L13.7 3.9a1.6 1.6 0 0 0-2.8 0Z"/></svg>Disputes <span class="count danger" id="navDisputeCount">1</span>
+    </div>
+    <div class="side-foot">Signed in as <span id="adminName">admin</span><br>Port Harcourt ops<span class="logout-link" id="logoutBtn">Log out</span></div>
+  </aside>
 
-    <script>
-      const CONFIG = {
-        API_BASE: "https://your-api.onrender.com/api",
-        DEMO_MODE: true,
-        AUTH_TOKEN: "",
-      };
+  <main class="main">
 
-      const PENDING_PROVIDERS = [
-        {
-          name: "Emeka Obi",
-          trade: "Plumbing",
-          city: "Port Harcourt",
-          phone: "0803 221 4471",
-          submitted: "2 days ago",
-        },
-        {
-          name: "Blessing Etim",
-          trade: "AC repair",
-          city: "Port Harcourt",
-          phone: "0705 992 1180",
-          submitted: "1 day ago",
-        },
-        {
-          name: "Musa Ibrahim",
-          trade: "Carpentry",
-          city: "Port Harcourt",
-          phone: "0810 664 3392",
-          submitted: "6 hours ago",
-        },
-      ];
+    <section class="page active" id="page-overview">
+      <div class="page-head"><h1>Overview</h1>
+        <select id="citySelect"><option>Port Harcourt</option><option>Lagos</option><option>Abuja</option><option>Ibadan</option></select>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-tile"><div class="num">142</div><div class="lbl">Total providers</div></div>
+        <div class="stat-tile"><div class="num">118</div><div class="lbl">Verified</div></div>
+        <div class="stat-tile"><div class="num">64</div><div class="lbl">Available now</div></div>
+        <div class="stat-tile"><div class="num">23</div><div class="lbl">Open requests</div></div>
+        <div class="stat-tile"><div class="num danger">1</div><div class="lbl">Disputed</div></div>
+      </div>
+      <div class="section-title">Pending verification</div>
+      <div class="panel"><table><thead><tr><th>Name</th><th>Trade</th><th>Submitted</th><th></th></tr></thead><tbody id="overviewPendingBody"></tbody></table></div>
+    </section>
 
-      const ACTIVE_PROVIDERS = [
-        {
-          name: "Tunde Adeyemi",
-          trade: "Electrical",
-          rating: 4.8,
-          jobs: 63,
-          status: "Available",
-        },
-        {
-          name: "Grace Effiong",
-          trade: "Plumbing",
-          rating: 4.6,
-          jobs: 41,
-          status: "Available",
-        },
-        {
-          name: "Sam Okoro",
-          trade: "Generator",
-          rating: 4.9,
-          jobs: 88,
-          status: "Offline",
-        },
-      ];
+    <section class="page" id="page-providers">
+      <div class="page-head"><h1>Providers</h1></div>
+      <div class="section-title">Pending verification</div>
+      <div class="panel"><table><thead><tr><th>Name</th><th>Trade</th><th>City</th><th>Phone</th><th>Submitted</th><th></th></tr></thead><tbody id="pendingBody"></tbody></table></div>
+      <div class="section-title">Active providers</div>
+      <div class="panel"><table><thead><tr><th>Name</th><th>Trade</th><th>Rating</th><th>Jobs</th><th>Status</th><th></th></tr></thead><tbody id="activeProvidersBody"></tbody></table></div>
+    </section>
 
-      const CUSTOMERS = [
-        {
-          name: "Chidi Nwosu",
-          phone: "0803 xxx xx12",
-          city: "Port Harcourt",
-          requests: 7,
-          status: "Active",
-        },
-        {
-          name: "Amaka Johnson",
-          phone: "0812 xxx xx45",
-          city: "Port Harcourt",
-          requests: 2,
-          status: "Active",
-        },
-        {
-          name: "Ifeanyi Uche",
-          phone: "0706 xxx xx03",
-          city: "Port Harcourt",
-          requests: 1,
-          status: "Banned",
-        },
-      ];
+    <section class="page" id="page-users">
+      <div class="page-head"><h1>Customers</h1></div>
+      <div class="panel"><table><thead><tr><th>Name</th><th>Phone</th><th>City</th><th>Requests posted</th><th>Status</th><th></th></tr></thead><tbody id="usersBody"></tbody></table></div>
+    </section>
 
-      const DISPUTES = [
-        {
-          job: "#PH-0219",
-          customer: "Amaka Johnson",
-          provider: "Sam Okoro",
-          raised: "3 hours ago",
-        },
-      ];
+    <section class="page" id="page-categories">
+      <div class="page-head"><h1>Categories</h1></div>
+      <div class="panel">
+        <div class="cat-form"><input type="text" id="catNameInput" placeholder="e.g. Roofing"><button id="addCatBtn">Add category</button></div>
+        <div style="padding:16px;" id="catChipWrap"></div>
+      </div>
+    </section>
 
-      let categories = [
-        "Electrical",
-        "Plumbing",
-        "AC repair",
-        "Carpentry",
-        "Generator",
-        "Painting",
-      ];
+    <section class="page" id="page-disputes">
+      <div class="page-head"><h1>Disputes</h1></div>
+      <div class="panel"><table><thead><tr><th>Job</th><th>Customer</th><th>Provider</th><th>Raised</th><th></th></tr></thead><tbody id="disputesBody"></tbody></table></div>
+    </section>
 
-      function verifyBtn(idx) {
-        return `<button class="row-btn" onclick="verifyProvider(${idx})">Verify</button>`;
-      }
+  </main>
+</div>
 
-      function renderPending() {
-        const rows = PENDING_PROVIDERS.map(
-          (p, i) => `
-    <tr>
-      <td>${p.name}</td><td>${p.trade}</td><td>${p.city}</td>
-      <td class="mono">${p.phone}</td><td class="mono">${p.submitted}</td>
-      <td>${verifyBtn(i)}</td>
-    </tr>`,
-        ).join("");
-        document.getElementById("pendingBody").innerHTML =
-          rows ||
-          `<tr class="empty-row"><td colspan="6">No providers awaiting verification.</td></tr>`;
+<script>
+const CONFIG = { API_BASE: 'https://your-api.onrender.com/api', DEMO_MODE: true };
 
-        const overviewRows = PENDING_PROVIDERS.map(
-          (p, i) => `
-    <tr><td>${p.name}</td><td>${p.trade}</td><td class="mono">${p.submitted}</td><td>${verifyBtn(i)}</td></tr>
-  `,
-        ).join("");
-        document.getElementById("overviewPendingBody").innerHTML =
-          overviewRows ||
-          `<tr class="empty-row"><td colspan="4">Nothing pending.</td></tr>`;
+const auth = JSON.parse(localStorage.getItem('servilink_auth') || 'null');
+if (!CONFIG.DEMO_MODE) {
+  if (!auth || auth.role !== 'admin') location.href = 'login.html?role=admin';
+}
+document.getElementById('app').style.display = 'flex';
+if (auth) document.getElementById('adminName').textContent = auth.name || 'admin';
+document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem('servilink_auth'); location.href = 'landing-page.html'; });
 
-        document.getElementById("navPendingCount").textContent =
-          PENDING_PROVIDERS.length;
-      }
+const PENDING_PROVIDERS = [
+  { name:'Emeka Obi', trade:'Plumbing', city:'Port Harcourt', phone:'0803 221 4471', submitted:'2 days ago' },
+  { name:'Blessing Etim', trade:'AC repair', city:'Port Harcourt', phone:'0705 992 1180', submitted:'1 day ago' },
+  { name:'Musa Ibrahim', trade:'Carpentry', city:'Port Harcourt', phone:'0810 664 3392', submitted:'6 hours ago' },
+];
+const ACTIVE_PROVIDERS = [
+  { name:'Tunde Adeyemi', trade:'Electrical', rating:4.8, jobs:63, status:'Available' },
+  { name:'Grace Effiong', trade:'Plumbing', rating:4.6, jobs:41, status:'Available' },
+  { name:'Sam Okoro', trade:'Generator', rating:4.9, jobs:88, status:'Offline' },
+];
+const CUSTOMERS = [
+  { name:'Chidi Nwosu', phone:'0803 xxx xx12', city:'Port Harcourt', requests:7, status:'Active' },
+  { name:'Amaka Johnson', phone:'0812 xxx xx45', city:'Port Harcourt', requests:2, status:'Active' },
+  { name:'Ifeanyi Uche', phone:'0706 xxx xx03', city:'Port Harcourt', requests:1, status:'Banned' },
+];
+const DISPUTES = [ { job:'#PH-0219', customer:'Amaka Johnson', provider:'Sam Okoro', raised:'3 hours ago' } ];
+let categories = ['Electrical', 'Plumbing', 'AC repair', 'Carpentry', 'Generator', 'Painting'];
 
-      function verifyProvider(idx) {
-        const p = PENDING_PROVIDERS[idx];
-        if (!CONFIG.DEMO_MODE) {
-          // fetch(`${CONFIG.API_BASE}/admin/providers/${p.id}/verify`, { method:'PATCH', headers:{ Authorization:`Bearer ${CONFIG.AUTH_TOKEN}` } });
-        }
-        PENDING_PROVIDERS.splice(idx, 1);
-        renderPending();
-      }
+function verifyBtn(idx) { return `<button class="row-btn" onclick="verifyProvider(${idx})">Verify</button>`; }
 
-      function renderActiveProviders() {
-        document.getElementById("activeProvidersBody").innerHTML =
-          ACTIVE_PROVIDERS.map(
-            (p) => `
-    <tr>
-      <td>${p.name}</td><td>${p.trade}</td><td class="mono">${p.rating}★</td><td class="mono">${p.jobs}</td>
-      <td><span class="badge ${p.status === "Available" ? "teal" : "slate"}">${p.status}</span></td>
-      <td><button class="row-btn danger">Suspend</button></td>
-    </tr>`,
-          ).join("");
-      }
+function renderPending() {
+  document.getElementById('pendingBody').innerHTML = PENDING_PROVIDERS.map((p, i) => `
+    <tr><td>${p.name}</td><td>${p.trade}</td><td>${p.city}</td><td>${p.phone}</td><td>${p.submitted}</td><td>${verifyBtn(i)}</td></tr>
+  `).join('') || `<tr class="empty-row"><td colspan="6">No providers awaiting verification.</td></tr>`;
 
-      function renderUsers() {
-        document.getElementById("usersBody").innerHTML = CUSTOMERS.map(
-          (u) => `
-    <tr>
-      <td>${u.name}</td><td class="mono">${u.phone}</td><td>${u.city}</td><td class="mono">${u.requests}</td>
-      <td><span class="badge ${u.status === "Active" ? "teal" : "rust"}">${u.status}</span></td>
-      <td>${u.status === "Active" ? '<button class="row-btn danger">Ban</button>' : '<button class="row-btn">Reinstate</button>'}</td>
-    </tr>`,
-        ).join("");
-      }
+  document.getElementById('overviewPendingBody').innerHTML = PENDING_PROVIDERS.map((p, i) => `
+    <tr><td>${p.name}</td><td>${p.trade}</td><td>${p.submitted}</td><td>${verifyBtn(i)}</td></tr>
+  `).join('') || `<tr class="empty-row"><td colspan="4">Nothing pending.</td></tr>`;
 
-      function renderDisputes() {
-        document.getElementById("navDisputeCount").textContent = DISPUTES.length;
-        document.getElementById("disputesBody").innerHTML =
-          DISPUTES.map(
-            (d) => `
-    <tr>
-      <td class="mono">${d.job}</td><td>${d.customer}</td><td>${d.provider}</td><td class="mono">${d.raised}</td>
-      <td><button class="row-btn">Review</button></td>
-    </tr>`,
-          ).join("") ||
-          `<tr class="empty-row"><td colspan="5">No open disputes.</td></tr>`;
-      }
+  document.getElementById('navPendingCount').textContent = PENDING_PROVIDERS.length;
+}
+function verifyProvider(idx) { PENDING_PROVIDERS.splice(idx, 1); renderPending(); }
 
-      function renderCategories() {
-        document.getElementById("catChipWrap").innerHTML = categories
-          .map((c) => `<span class="cat-chip">${c}</span>`)
-          .join("");
-      }
+function renderActiveProviders() {
+  document.getElementById('activeProvidersBody').innerHTML = ACTIVE_PROVIDERS.map(p => `
+    <tr><td>${p.name}</td><td>${p.trade}</td><td>${p.rating}★</td><td>${p.jobs}</td>
+      <td><span class="badge ${p.status==='Available'?'badge-teal':'badge-slate'}">${p.status}</span></td>
+      <td><button class="row-btn danger">Suspend</button></td></tr>
+  `).join('');
+}
+function renderUsers() {
+  document.getElementById('usersBody').innerHTML = CUSTOMERS.map(u => `
+    <tr><td>${u.name}</td><td>${u.phone}</td><td>${u.city}</td><td>${u.requests}</td>
+      <td><span class="badge ${u.status==='Active'?'badge-teal':'badge-danger'}">${u.status}</span></td>
+      <td>${u.status==='Active' ? '<button class="row-btn danger">Ban</button>' : '<button class="row-btn">Reinstate</button>'}</td></tr>
+  `).join('');
+}
+function renderDisputes() {
+  document.getElementById('navDisputeCount').textContent = DISPUTES.length;
+  document.getElementById('disputesBody').innerHTML = DISPUTES.map(d => `
+    <tr><td>${d.job}</td><td>${d.customer}</td><td>${d.provider}</td><td>${d.raised}</td><td><button class="row-btn">Review</button></td></tr>
+  `).join('') || `<tr class="empty-row"><td colspan="5">No open disputes.</td></tr>`;
+}
+function renderCategories() { document.getElementById('catChipWrap').innerHTML = categories.map(c => `<span class="cat-chip">${c}</span>`).join(''); }
 
-      document.getElementById("addCatBtn").addEventListener("click", () => {
-        const input = document.getElementById("catNameInput");
-        const val = input.value.trim();
-        if (!val) return;
-        categories.push(val);
-        input.value = "";
-        renderCategories();
-        if (!CONFIG.DEMO_MODE) {
-          // fetch(`${CONFIG.API_BASE}/admin/categories`, { method:'POST', headers:{'Content-Type':'application/json', Authorization:`Bearer ${CONFIG.AUTH_TOKEN}`}, body: JSON.stringify({ name: val, slug: val.toLowerCase() }) });
-        }
-      });
+document.getElementById('addCatBtn').addEventListener('click', () => {
+  const input = document.getElementById('catNameInput');
+  const val = input.value.trim();
+  if (!val) return;
+  categories.push(val); input.value = ''; renderCategories();
+});
 
-      document.querySelectorAll(".nav-item").forEach((item) => {
-        item.addEventListener("click", () => {
-          document
-            .querySelectorAll(".nav-item")
-            .forEach((i) => i.classList.remove("active"));
-          item.classList.add("active");
-          document
-            .querySelectorAll(".page")
-            .forEach((p) => p.classList.remove("active"));
-          document
-            .getElementById(`page-${item.dataset.page}`)
-            .classList.add("active");
-        });
-      });
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(`page-${item.dataset.page}`).classList.add('active');
+  });
+});
 
-      renderPending();
-      renderActiveProviders();
-      renderUsers();
-      renderDisputes();
-      renderCategories();
-    </script>
-  </body>
+renderPending(); renderActiveProviders(); renderUsers(); renderDisputes(); renderCategories();
+</script>
+</body>
 </html>
