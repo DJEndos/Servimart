@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ServiLink — Find a trusted technician nearby</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --ink: #172420;
+        --paper: #eae6da;
+        --paper-2: #f4f1e7;
+        --teal: #1f5c56;
+        --teal-deep: #123b37;
+        --amber: #e8a33d;
+        --amber-deep: #c87f1e;
+        --rust: #b0483a;
+        --slate: #7c877e;
+        --line: rgba(23, 36, 32, 0.16);
+        font-size: 16px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "IBM Plex Sans", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        justify-content: center;
+      }
+      .device {
+        width: 100%;
+        max-width: 440px;
+        min-height: 100vh;
+        background: var(--paper);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 76px; /* space for bottom tabs */
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: "Archivo", sans-serif;
+        margin: 0;
+        letter-spacing: -0.01em;
+      }
+      .mono {
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      /* ---------- Top bar ---------- */
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 22px 14px;
+      }
+      .wordmark {
+        font-family: "Archivo", sans-serif;
+        font-weight: 900;
+        font-size: 1.15rem;
+      }
+      .wordmark span {
+        color: var(--teal);
+      }
+       .wordmark img{
+        width: 90px;
+      }
+
+      .city-chip {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--teal-deep);
+        background: var(--paper-2);
+        border: 1px solid var(--line);
+        padding: 6px 12px;
+        border-radius: 100px;
+      }
+
+      /* ---------- Views ---------- */
+      .view {
+        display: none;
+        flex: 1;
+        padding: 6px 22px 28px;
+      }
+      .view.active {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ---------- Home ---------- */
+      .hero {
+        margin: 6px 0 22px;
+      }
+      .hero h1 {
+        font-size: 1.7rem;
+        line-height: 1.2;
+        font-weight: 700;
+        max-width: 320px;
+      }
+      .cat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 22px;
+      }
+      .cat-tile {
+        background: var(--paper-2);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 14px 8px 10px;
+        text-align: center;
+        cursor: pointer;
+        transition:
+          background 0.15s ease,
+          border-color 0.15s ease;
+      }
+      .cat-tile svg {
+        width: 26px;
+        height: 26px;
+        stroke: var(--teal-deep);
+      }
+      .cat-tile p {
+        margin: 8px 0 0;
+        font-size: 0.74rem;
+        font-weight: 500;
+      }
+      .cat-tile.selected {
+        background: var(--teal);
+        border-color: var(--teal);
+      }
+      .cat-tile.selected svg {
+        stroke: var(--paper);
+      }
+      .cat-tile.selected p {
+        color: var(--paper);
+      }
+
+      .divider-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 6px 0 16px;
+        font-size: 0.76rem;
+        color: var(--slate);
+      }
+      .divider-label::before,
+      .divider-label::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--line);
+      }
+
+      textarea {
+        width: 100%;
+        resize: none;
+        font-family: inherit;
+        font-size: 0.92rem;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--paper-2);
+        color: var(--ink);
+        min-height: 64px;
+      }
+      textarea:focus,
+      button:focus-visible,
+      .cat-tile:focus-visible {
+        outline: 2px solid var(--teal-deep);
+        outline-offset: 2px;
+      }
+
+      .loc-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 12px 0 4px;
+        font-size: 0.84rem;
+        color: var(--teal-deep);
+        cursor: pointer;
+        font-weight: 500;
+      }
+      .loc-row svg {
+        width: 16px;
+        height: 16px;
+        stroke: var(--teal-deep);
+      }
+      .loc-row.done {
+        color: var(--slate);
+      }
+
+      .spacer {
+        flex: 1;
+      }
+
+      .btn {
+        font-family: "IBM Plex Sans", sans-serif;
+        font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 6px;
+        padding: 15px 18px;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+      }
+      .btn-primary {
+        background: var(--amber);
+        color: var(--teal-deep);
+      }
+      .btn-primary:hover {
+        background: var(--amber-deep);
+      }
+      .btn-primary:disabled {
+        background: #d8d2c2;
+        color: var(--slate);
+        cursor: not-allowed;
+      }
+      .btn-outline {
+        background: transparent;
+        border: 1px solid var(--line);
+        color: var(--ink);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--teal-deep);
+        font-weight: 500;
+        padding: 10px;
+      }
+
+      /* ---------- Searching ---------- */
+      .searching {
+        align-items: center;
+        text-align: center;
+        justify-content: center;
+        gap: 18px;
+      }
+      .radar {
+        position: relative;
+        width: 120px;
+        height: 120px;
+      }
+      .radar span {
+        position: absolute;
+        inset: 0;
+        border: 1px solid var(--teal);
+        border-radius: 50%;
+        opacity: 0;
+        animation: ping 2.2s ease-out infinite;
+      }
+      .radar span:nth-child(2) {
+        animation-delay: 0.7s;
+      }
+      .radar span:nth-child(3) {
+        animation-delay: 1.4s;
+      }
+      .radar::before {
+        content: "";
+        position: absolute;
+        inset: 44px;
+        background: var(--teal);
+        border-radius: 50%;
+      }
+      @keyframes ping {
+        0% {
+          transform: scale(0.3);
+          opacity: 0.65;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .radar span {
+          animation: none;
+          opacity: 0.3;
+        }
+      }
+      .searching h2 {
+        font-size: 1.1rem;
+      }
+      .searching p {
+        color: var(--slate);
+        font-size: 0.86rem;
+        max-width: 240px;
+      }
+
+      /* ---------- Ticket component ---------- */
+      .ticket {
+        position: relative;
+        background: var(--paper-2);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        margin-top: 8px;
+      }
+      .ticket-stub {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1.5px dashed var(--line);
+        position: relative;
+      }
+      .ticket::before,
+      .ticket::after {
+        content: "";
+        position: absolute;
+        top: 47px;
+        width: 16px;
+        height: 16px;
+        background: var(--paper);
+        border-radius: 50%;
+        z-index: 1;
+      }
+      .ticket::before {
+        left: -8px;
+      }
+      .ticket::after {
+        right: -8px;
+      }
+      .ticket-id {
+        font-size: 0.72rem;
+        color: var(--slate);
+        letter-spacing: 0.02em;
+      }
+      .stamp {
+        font-size: 0.68rem;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 100px;
+        border: 1.5px solid currentColor;
+        text-transform: none;
+      }
+      .stamp.on-way {
+        color: var(--teal-deep);
+      }
+      .stamp.pending {
+        color: var(--amber-deep);
+      }
+      .ticket-body {
+        padding: 16px;
+      }
+
+      .provider-row {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+      .avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: var(--teal);
+        color: var(--paper);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Archivo";
+        font-weight: 700;
+        font-size: 1rem;
+        flex-shrink: 0;
+      }
+      .provider-name {
+        font-weight: 600;
+        font-size: 0.98rem;
+      }
+      .provider-meta {
+        font-size: 0.78rem;
+        color: var(--slate);
+        margin-top: 2px;
+      }
+      .meta-row {
+        display: flex;
+        gap: 14px;
+        font-size: 0.8rem;
+        color: var(--teal-deep);
+        margin-bottom: 14px;
+      }
+      .meta-row div {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .meta-row svg {
+        width: 14px;
+        height: 14px;
+        stroke: var(--teal-deep);
+      }
+
+      .action-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 4px;
+      }
+      .action-row .btn {
+        flex: 1;
+        padding: 12px;
+        font-size: 0.86rem;
+      }
+
+      .timeline {
+        margin-top: 22px;
+      }
+      .tl-item {
+        display: flex;
+        gap: 12px;
+        padding-bottom: 18px;
+        position: relative;
+      }
+      .tl-item:last-child {
+        padding-bottom: 0;
+      }
+      .tl-item::before {
+        content: "";
+        position: absolute;
+        left: 5px;
+        top: 16px;
+        bottom: 0;
+        width: 1px;
+        background: var(--line);
+      }
+      .tl-item:last-child::before {
+        display: none;
+      }
+      .tl-dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        margin-top: 3px;
+        flex-shrink: 0;
+        background: var(--line);
+      }
+      .tl-item.done .tl-dot {
+        background: var(--teal);
+      }
+      .tl-item.active .tl-dot {
+        background: var(--amber);
+      }
+      .tl-label {
+        font-size: 0.86rem;
+        font-weight: 500;
+      }
+      .tl-time {
+        font-size: 0.72rem;
+        color: var(--slate);
+      }
+      .tl-item:not(.done):not(.active) .tl-label {
+        color: var(--slate);
+      }
+
+      .price-box {
+        margin-top: 20px;
+        padding: 14px 16px;
+        background: var(--teal-deep);
+        color: var(--paper);
+        border-radius: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .price-box .amt {
+        font-family: "IBM Plex Mono";
+        font-size: 1.05rem;
+        font-weight: 500;
+      }
+      .price-box .label {
+        font-size: 0.74rem;
+        opacity: 0.75;
+      }
+
+      /* ---------- Bottom tabs ---------- */
+      .tabbar {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 440px;
+        background: var(--paper-2);
+        border-top: 1px solid var(--line);
+        display: flex;
+        padding: 8px 10px 14px;
+      }
+      .tab {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.68rem;
+        color: var(--slate);
+        cursor: pointer;
+        padding: 6px 0;
+        background: none;
+        border: none;
+        font-family: inherit;
+      }
+      .tab svg {
+        width: 20px;
+        height: 20px;
+        stroke: var(--slate);
+      }
+      .tab.active {
+        color: var(--teal-deep);
+      }
+      .tab.active svg {
+        stroke: var(--teal-deep);
+      }
+
+      .empty {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--slate);
+      }
+      .empty h3 {
+        color: var(--ink);
+        font-size: 1.05rem;
+        margin-bottom: 8px;
+      }
+      .empty p {
+        font-size: 0.86rem;
+      }
+
+      .req-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 4px;
+        border-bottom: 1px solid var(--line);
+      }
+      .req-list-item .rl-title {
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+      .req-list-item .rl-sub {
+        font-size: 0.76rem;
+        color: var(--slate);
+        margin-top: 2px;
+      }
+      .rl-status {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--teal-deep);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="device">
+
+      <div class="topbar">
+        <div class="wordmark"><img src="/frontend/img/logo.png" alt=""></div>
+        <div class="city-chip" id="cityChip">Port Harcourt</div>
+      </div>
+
+      <section class="view active" id="view-home">
+        <div class="hero">
+          <h1>What do you need help with today?</h1>
+        </div>
+
+        <div class="cat-grid" id="catGrid"></div>
+
+        <div class="divider-label">or describe it</div>
+        <textarea id="descInput" placeholder="e.g. Kitchen tap is leaking from the base"></textarea>
+
+        <div class="loc-row" id="locRow">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21c-4-4.5-7-8.3-7-11.5A7 7 0 0 1 19 9.5C19 12.7 16 16.5 12 21Z"/></svg>
+          <span id="locLabel">Use my current location</span>
+        </div>
+
+        <div class="spacer"></div>
+        <button class="btn btn-primary" id="findBtn" disabled>Find someone nearby</button>
+      </section>
+
+      <!-- ===================== SEARCHING ===================== -->
+      <section class="view" id="view-searching">
+        <div class="searching" style="flex:1;">
+          <div class="radar"><span></span><span></span><span></span></div>
+          <h2>Looking nearby</h2>
+          <p>Checking who's available around you — this usually takes under a minute.</p>
+        </div>
+      </section>
+
+      <!-- ===================== MATCHED / TRACKING ===================== -->
+      <section class="view" id="view-matched">
+        <h3 style="margin-bottom:4px;">Your request</h3>
+        <p class="mono" style="font-size:0.78rem; color:var(--slate); margin:0 0 4px;" id="reqId">#PH-0231</p>
+
+        <div class="ticket">
+          <div class="ticket-stub">
+            <span class="ticket-id mono" id="reqCategory">Electrical repair</span>
+            <span class="stamp on-way" id="reqStamp">On the way</span>
+          </div>
+          <div class="ticket-body">
+            <div class="provider-row">
+              <div class="avatar" id="provInitials">TA</div>
+              <div>
+                <div class="provider-name" id="provName">Tunde Adeyemi</div>
+                <div class="provider-meta" id="provMeta">Electrician · 4.8★ (63 jobs)</div>
+              </div>
+            </div>
+            <div class="meta-row">
+              <div>
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 21c-4-4.5-7-8.3-7-11.5A7 7 0 0 1 19 9.5C19 12.7 16 16.5 12 21Z"/></svg>
+                <span id="reqDistance">1.2 km away</span>
+              </div>
+              <div>
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                <span id="reqEta">~6 min</span>
+              </div>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-outline">Message</button>
+              <button class="btn btn-outline">Call</button>
+            </div>
+
+            <div class="timeline" id="timeline"></div>
+
+            <div class="price-box">
+              <div>
+                <div class="label">Due on completion</div>
+                <div class="amt">₦8,500</div>
+              </div>
+              <button class="btn btn-primary" style="width:auto; padding:9px 16px; font-size:0.8rem;">Pay</button>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-ghost" id="newReqBtn" style="margin-top:18px;">Post a new request</button>
+      </section>
+
+      <!-- ===================== MY REQUESTS ===================== -->
+      <section class="view" id="view-requests">
+        <h3 style="margin:8px 0 14px;">My requests</h3>
+        <div id="reqListWrap"></div>
+      </section>
+
+      <!-- ===================== PROFILE ===================== -->
+      <section class="view" id="view-profile">
+        <div class="empty">
+          <div class="avatar" style="margin:0 auto 16px;">CN</div>
+          <h3>Chidi Nwosu</h3>
+          <p>0803 xxx xx12 · Port Harcourt</p>
+        </div>
+      </section>
+
+      <nav class="tabbar">
+        <button class="tab active" data-tab="home">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"/><path d="M6 10v9h12v-9"/></svg>
+          Home
+        </button>
+        <button class="tab" data-tab="requests">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="1"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
+          Requests
+        </button>
+        <button class="tab" data-tab="profile">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c1.5-4 4.2-6 7-6s5.5 2 7 6"/></svg>
+          Profile
+        </button>
+      </nav>
+    </div>
+
+    <script>
+      /* ============================================================
+         CONFIG — point this at your deployed API. Demo mode runs
+         entirely on mock data so the flow is reviewable without a
+         live backend.
+         ============================================================ */
+      const CONFIG = {
+        API_BASE: "https://your-api.onrender.com/api",
+        DEMO_MODE: true,
+        AUTH_TOKEN: "", // set after login
+      };
+
+      const CATEGORIES = [
+        {
+          slug: "electrical",
+          name: "Electrical",
+          icon: '<path d="M13 2 3 14h6l-1 8 11-14h-6z"/>',
+        },
+        {
+          slug: "plumbing",
+          name: "Plumbing",
+          icon: '<path d="M7 3h4v4H9v3h6V7h-2V3h4v6h-2v3a4 4 0 0 1-4 4v4H9v-4a4 4 0 0 1-2-3.46V9H5V3Z"/>',
+        },
+        {
+          slug: "ac",
+          name: "AC repair",
+          icon: '<path d="M12 2v20M4.5 6 19.5 18M19.5 6 4.5 18"/>',
+        },
+        {
+          slug: "carpentry",
+          name: "Carpentry",
+          icon: '<path d="m18 2 4 4-13 13-5 1 1-5Z"/>',
+        },
+        {
+          slug: "generator",
+          name: "Generator",
+          icon: '<rect x="3" y="8" width="18" height="10" rx="1"/><path d="M7 8V5h10v3M9 13h2M13 13h2"/>',
+        },
+        {
+          slug: "painting",
+          name: "Painting",
+          icon: '<path d="M18 2 22 6l-9 9-4 1 1-4Z"/><path d="M13 15 6 22H2v-4l7-7"/>',
+        },
+      ];
+
+      const catGrid = document.getElementById("catGrid");
+      let selectedCategory = null;
+
+      CATEGORIES.forEach((cat) => {
+        const tile = document.createElement("div");
+        tile.className = "cat-tile";
+        tile.tabIndex = 0;
+        tile.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${cat.icon}</svg><p>${cat.name}</p>`;
+        tile.addEventListener("click", () => {
+          document
+            .querySelectorAll(".cat-tile")
+            .forEach((t) => t.classList.remove("selected"));
+          tile.classList.add("selected");
+          selectedCategory = cat.slug;
+          updateFindButton();
+        });
+        catGrid.appendChild(tile);
+      });
+
+      let locationCoords = null;
+      document.getElementById("locRow").addEventListener("click", function () {
+        const label = document.getElementById("locLabel");
+        if (CONFIG.DEMO_MODE) {
+          locationCoords = [7.0134, 4.8156]; // Port Harcourt demo coordinates
+          label.textContent = "Location set — Port Harcourt";
+          this.classList.add("done");
+          updateFindButton();
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            locationCoords = [pos.coords.longitude, pos.coords.latitude];
+            label.textContent = "Location set";
+            this.classList.add("done");
+            updateFindButton();
+          },
+          () => {
+            label.textContent = "Could not get location — try again";
+          },
+        );
+      });
+
+      function updateFindButton() {
+        document.getElementById("findBtn").disabled = !(
+          selectedCategory && locationCoords
+        );
+      }
+
+      document.getElementById("descInput").addEventListener("input", () => {});
+
+      function showView(id) {
+        document
+          .querySelectorAll(".view")
+          .forEach((v) => v.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+      }
+
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document
+            .querySelectorAll(".tab")
+            .forEach((t) => t.classList.remove("active"));
+          tab.classList.add("active");
+          const map = {
+            home: "view-home",
+            requests: "view-requests",
+            profile: "view-profile",
+          };
+          showView(map[tab.dataset.tab]);
+          if (tab.dataset.tab === "requests") renderRequestList();
+        });
+      });
+
+      document.getElementById("newReqBtn").addEventListener("click", () => {
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+        document.querySelector('[data-tab="home"]').classList.add("active");
+        showView("view-home");
+      });
+
+      async function postServiceRequest() {
+        showView("view-searching");
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.remove("active"));
+
+        if (CONFIG.DEMO_MODE) {
+          setTimeout(() => renderMatch(MOCK_MATCH), 1600);
+          return;
+        }
+
+        try {
+          const res = await fetch(`${CONFIG.API_BASE}/customer/requests`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${CONFIG.AUTH_TOKEN}`,
+            },
+            body: JSON.stringify({
+              categoryId: selectedCategory,
+              description: document.getElementById("descInput").value,
+              longitude: locationCoords[0],
+              latitude: locationCoords[1],
+            }),
+          });
+          const data = await res.json();
+          renderMatch(data); // shape should be adapted to your real API response
+        } catch (err) {
+          alert("Could not reach the server. Check API_BASE in CONFIG.");
+          showView("view-home");
+        }
+      }
+
+      document
+        .getElementById("findBtn")
+        .addEventListener("click", postServiceRequest);
+
+      const MOCK_MATCH = {
+        id: "PH-0231",
+        category: "Electrical repair",
+        provider: {
+          name: "Tunde Adeyemi",
+          trade: "Electrician",
+          rating: 4.8,
+          jobs: 63,
+          distanceKm: 1.2,
+          etaMin: 6,
+        },
+        status: "on_way", // posted -> matched -> on_way -> completed
+        price: 8500,
+      };
+
+      function initials(name) {
+        return name
+          .split(" ")
+          .map((p) => p[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2);
+      }
+
+      function renderMatch(m) {
+        document.getElementById("reqId").textContent = `#${m.id}`;
+        document.getElementById("reqCategory").textContent = m.category;
+        document.getElementById("provInitials").textContent = initials(
+          m.provider.name,
+        );
+        document.getElementById("provName").textContent = m.provider.name;
+        document.getElementById("provMeta").textContent =
+          `${m.provider.trade} · ${m.provider.rating}★ (${m.provider.jobs} jobs)`;
+        document.getElementById("reqDistance").textContent =
+          `${m.provider.distanceKm} km away`;
+        document.getElementById("reqEta").textContent = `~${m.provider.etaMin} min`;
+
+        const stamp = document.getElementById("reqStamp");
+        const statusLabels = {
+          matched: "Matched",
+          on_way: "On the way",
+          completed: "Completed",
+        };
+        stamp.textContent = statusLabels[m.status] || "Matched";
+        stamp.className = "stamp " + (m.status === "completed" ? "on-way" : "on-way");
+
+        const steps = [
+          { key: "posted", label: "Request posted", time: "2:04 PM" },
+          { key: "matched", label: "Provider matched", time: "2:05 PM" },
+          {
+            key: "on_way",
+            label: "On the way",
+            time: m.status === "on_way" || m.status === "completed" ? "2:07 PM" : "",
+          },
+          {
+            key: "completed",
+            label: "Job completed",
+            time: m.status === "completed" ? "—" : "",
+          },
+        ];
+        const order = ["posted", "matched", "on_way", "completed"];
+        const currentIdx = order.indexOf(
+          m.status === "matched" ? "matched" : m.status,
+        );
+
+        const tl = document.getElementById("timeline");
+        tl.innerHTML = "";
+        steps.forEach((s, i) => {
+          const idx = order.indexOf(s.key);
+          const state =
+            idx < currentIdx ? "done" : idx === currentIdx ? "active" : "";
+          const div = document.createElement("div");
+          div.className = `tl-item ${state}`;
+          div.innerHTML = `<div class="tl-dot"></div><div><div class="tl-label">${s.label}</div><div class="tl-time mono">${s.time || ""}</div></div>`;
+          tl.appendChild(div);
+        });
+
+        showView("view-matched");
+      }
+
+      const MOCK_REQUESTS = [
+        {
+          id: "PH-0231",
+          title: "Electrical repair",
+          sub: "Today · 2:04 PM",
+          status: "On the way",
+        },
+        {
+          id: "PH-0198",
+          title: "Leaking kitchen tap",
+          sub: "Sep 12 · Completed",
+          status: "Completed",
+        },
+        {
+          id: "PH-0176",
+          title: "Generator servicing",
+          sub: "Aug 30 · Completed",
+          status: "Completed",
+        },
+      ];
+
+      function renderRequestList() {
+        const wrap = document.getElementById("reqListWrap");
+        if (MOCK_REQUESTS.length === 0) {
+          wrap.innerHTML = `<div class="empty"><h3>No requests yet</h3><p>When you post a job, it'll show up here.</p></div>`;
+          return;
+        }
+        wrap.innerHTML = MOCK_REQUESTS.map(
+          (r) => `
+    <div class="req-list-item">
+      <div><div class="rl-title">${r.title}</div><div class="rl-sub mono">${r.sub}</div></div>
+      <div class="rl-status">${r.status}</div>
+    </div>
+  `,
+        ).join("");
+      }
+    </script>
+  </body>
+</html>
